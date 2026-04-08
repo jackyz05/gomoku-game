@@ -4,7 +4,8 @@
 const GAME_STATES = {
     PLAYING: 'playing',
     BLACK_WIN: 'black_win',
-    WHITE_WIN: 'white_win'
+    WHITE_WIN: 'white_win',
+    DRAW: 'draw'
 };
 
 // 玩家常量
@@ -118,6 +119,9 @@ class GomokuGame {
         // 检查是否获胜
         if (this.checkWin(row, col)) {
             this.gameState = this.currentPlayer === PLAYERS.BLACK ? GAME_STATES.BLACK_WIN : GAME_STATES.WHITE_WIN;
+        } else if (this.checkDraw()) {
+            // 检查是否平局
+            this.gameState = GAME_STATES.DRAW;
         } else {
             // 切换玩家
             this.currentPlayer = this.currentPlayer === PLAYERS.BLACK ? PLAYERS.WHITE : PLAYERS.BLACK;
@@ -181,10 +185,25 @@ class GomokuGame {
     }
 
     /**
+     * 检查是否平局（棋盘已满且无获胜者）
+     */
+    checkDraw() {
+        for (let row = 0; row < CONFIG.BOARD_SIZE; row++) {
+            for (let col = 0; col < CONFIG.BOARD_SIZE; col++) {
+                if (this.board[row][col] === null) {
+                    return false; // 还有空位，不是平局
+                }
+            }
+        }
+        return true; // 棋盘已满，平局
+    }
+
+    /**
      * 悔棋
      */
     undoMove() {
-        if (this.moveHistory.length === 0) {
+        // 游戏结束后不能悔棋
+        if (this.moveHistory.length === 0 || this.gameState !== GAME_STATES.PLAYING) {
             return;
         }
 
@@ -194,7 +213,8 @@ class GomokuGame {
 
         // 重置游戏状态
         this.gameState = GAME_STATES.PLAYING;
-        this.currentPlayer = lastMove.player;
+        // 悔棋后应该轮到对手下棋，而不是最后一步的玩家
+        this.currentPlayer = lastMove.player === PLAYERS.BLACK ? PLAYERS.WHITE : PLAYERS.BLACK;
 
         // 更新显示
         this.renderBoard();
@@ -232,13 +252,17 @@ class GomokuGame {
                 this.gameStatusDisplay.textContent = '白子获胜！';
                 this.gameStatusDisplay.style.color = '#dc3545';
                 break;
+            case GAME_STATES.DRAW:
+                this.gameStatusDisplay.textContent = '平局！';
+                this.gameStatusDisplay.style.color = '#ffc107';
+                break;
             default:
                 this.gameStatusDisplay.textContent = '游戏进行中';
                 this.gameStatusDisplay.style.color = '#007bff';
         }
 
         // 更新悔棋按钮状态
-        this.undoBtn.disabled = this.moveHistory.length === 0;
+        this.undoBtn.disabled = this.moveHistory.length === 0 || this.gameState !== GAME_STATES.PLAYING;
     }
 }
 

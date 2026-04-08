@@ -1,0 +1,14 @@
+{
+  "name": "gomoku-game",
+  "version": "1.0.0",
+  "description": "A frontend Gomoku (Five in a Row) game",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "build": "echo 'No build needed for static files'",
+    "typecheck": "echo 'No TypeScript files to check'"
+  },
+  "keywords": ["gomoku", "game", "frontend", "html", "css", "javascript"],
+  "author": "Your Name",
+  "license": "MIT"
+}

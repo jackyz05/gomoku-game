@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五子棋测试</title>
+</head>
+<body>
+    <h1>五子棋功能测试</h1>
+    <div id="testResults"></div>
+
+    <script type="module">
+        import { GomokuGame } from './game.js';
+        import { PLAYERS, GAME_STATES } from './constants.js';
+
+        const testResults = document.getElementById('testResults');
+        let testCount = 0;
+        let passedTests = 0;
+
+        function logTest(name, passed, message = '') {
+            testCount++;
+            const status = passed ? '✅ 通过' : '❌ 失败';
+            const result = `${testCount}. ${name}: ${status} ${message}`;
+
+            const div = document.createElement('div');
+            div.textContent = result;
+            div.style.color = passed ? 'green' : 'red';
+            testResults.appendChild(div);
+
+            if (passed) passedTests++;
+
+            console.log(result);
+        }
+
+        function runTests() {
+            console.log('开始运行五子棋测试...');
+
+            // 测试1: 基本下棋功能
+            const game1 = new GomokuGame();
+            const move1 = game1.makeMove(7, 7);
+            logTest('基本下棋功能', move1 === true && game1.board[7][7] === PLAYERS.BLACK, '黑子下在(7,7)');
+
+            // 测试2: 玩家切换
+            const move2 = game1.makeMove(7, 8);
+            logTest('玩家切换', move2 === true && game1.board[7][8] === PLAYERS.WHITE && game1.currentPlayer === PLAYERS.BLACK, '白子下在(7,8)，当前玩家应为黑子');
+
+            // 测试3: 悔棋功能 - 这是关键测试
+            const undoSuccess = game1.undoMove();
+            logTest('悔棋功能', undoSuccess === true && game1.board[7][8] === null && game1.currentPlayer === PLAYERS.WHITE, '悔棋后白子位置清空，当前玩家应为白子');
+
+            // 测试4: 悔棋后继续下棋
+            const move3 = game1.makeMove(7, 9);
+            logTest('悔棋后继续下棋', move3 === true && game1.board[7][9] === PLAYERS.WHITE, '白子可以继续下棋');
+
+            // 测试5: 重复下棋位置
+            const move4 = game1.makeMove(7, 7);
+            logTest('重复下棋位置', move4 === false, '不能重复下在已有棋子的位置');
+
+            // 测试6: 游戏结束状态
+            const game2 = new GomokuGame();
+            // 模拟连成5子的情况
+            game2.makeMove(0, 0); // 黑
+            game2.makeMove(1, 0); // 白
+            game2.makeMove(0, 1); // 黑
+            game2.makeMove(1, 1); // 白
+            game2.makeMove(0, 2); // 黑
+            game2.makeMove(1, 2); // 白
+            game2.makeMove(0, 3); // 黑
+            game2.makeMove(1, 3); // 白
+            game2.makeMove(0, 4); // 黑 - 连成5子获胜
+
+            logTest('胜利检测', game2.gameState === GAME_STATES.BLACK_WIN, '黑子连成5子获胜');
+
+            // 测试7: 游戏结束后不能下棋
+            const moveAfterWin = game2.makeMove(2, 2);
+            logTest('游戏结束后不能下棋', moveAfterWin === false, '游戏结束后不能再下棋');
+
+            // 测试8: 游戏结束后悔棋限制
+            const undoAfterWin = game2.undoMove();
+            logTest('游戏结束后悔棋限制', undoAfterWin === false, '游戏结束后不能悔棋');
+
+            // 显示总结
+            const summary = document.createElement('div');
+            summary.innerHTML = `<br><strong>测试总结: ${passedTests}/${testCount} 通过</strong>`;
+            summary.style.fontSize = '18px';
+            summary.style.marginTop = '20px';
+            testResults.appendChild(summary);
+
+            console.log(`测试完成: ${passedTests}/${testCount} 通过`);
+        }
+
+        // 运行测试
+        runTests();
+    </script>
+</body>
+</html>

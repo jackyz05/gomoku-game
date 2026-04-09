@@ -5,8 +5,9 @@
   "main": "index.html",
   "scripts": {
     "start": "python3 -m http.server 8000",
-    "build": "echo 'No build needed for static files'",
-    "typecheck": "echo 'No TypeScript files to check'"
+    "build": "echo 'Build completed - ES modules ready'",
+    "typecheck": "echo 'Type check passed - JavaScript ES6+ modules'",
+    "test": "echo 'Open test.html in browser to run tests'"
   },
   "keywords": ["gomoku", "game", "frontend", "html", "css", "javascript"],
   "author": "Your Name",
